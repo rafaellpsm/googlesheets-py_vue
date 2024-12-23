@@ -1,0 +1,5 @@
+__pycache__
+venv
+
+credenciais.json
+sheet_id.txt
