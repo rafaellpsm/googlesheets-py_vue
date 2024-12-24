@@ -1,4 +1,7 @@
-# Kanban API - Documentação
+# Documentação
+
+![image](https://github.com/user-attachments/assets/a6cdde80-fcf7-4f8d-a3a3-8a48987faa7e)
+
 
 ## Sobre o Projeto (Português)
 Essa API foi desenvolvida para manipular e fornecer dados de uma planilha do Google Sheets em um formato adequado para aplicações do tipo Kanban. A estrutura dos dados permite organizar informações por categorias como Masculino, Feminino e Infantil.
