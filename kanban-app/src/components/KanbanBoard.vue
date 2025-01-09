@@ -12,7 +12,7 @@
                         <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
                     </div>
                     <div class="card-row texto-grande">
-                        <span><strong>Leito:</strong> {{ card.Leito || "N/A" }}</span>
+                        <span><strong>{{ card.Leito || "N/A" }}</strong></span>
                     </div>
                     <div class="card-row">
                         <span><strong>Hipótese:</strong> {{ card.Hipotese || "N/A" }}</span>

@@ -31,10 +31,10 @@ async def get_kanban_data(
         sheet = gc.open_by_key(sheet_id).sheet1
 
         expected_headers = [
-            "Data admissão", "Hora admissão", "Data e hora completa", "Prontuário SIGSS",
-            "Nome do Paciente", "Data de Nascimento", "Idade", "Sexo", 
+            "Data de admissão", "Hora admissão",
+            "Nome do Paciente", "Idade", "Sexo", 
             "Hipótese Diagnóstica", "Leito", "Pendências", 
-            "Total de horas de admissão", "Necessário fazer AIH?", "AIH Feita?"
+            "Tempo de Perm.", "Necessário fazer AIH?", "AIH Feita?"
         ]
 
         records = sheet.get_all_records(expected_headers=expected_headers)
@@ -48,7 +48,7 @@ async def get_kanban_data(
             "Hipótese Diagnóstica", 
             "Leito", 
             "Pendências", 
-            "Total de horas de admissão", 
+            "Tempo de Perm.", 
             "Necessário fazer AIH?"
         ]]
 
@@ -69,7 +69,7 @@ async def get_kanban_data(
                 "Hipotese": row.get("Hipótese Diagnóstica", "Não informado"),
                 "Leito": leito_formatado,
                 "Pendencia": row.get("Pendências", "Nenhuma"),
-                "TotalHoras": row.get("Total de horas de admissão", "0"),
+                "TotalHoras": row.get("Tempo de Perm.", "0"),
                 "NecessarioAIH": row.get("Necessário fazer AIH?", "Não")
             }
 
