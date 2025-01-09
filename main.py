@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import Request, FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import gspread
 import pandas as pd
@@ -15,16 +15,27 @@ app.add_middleware(
 
 gc = gspread.service_account("credenciais.json")
 sheet_string = ""
+password = ""
 with open('sheet_id.txt', 'r') as file:
-    sheet_string = file.read().rstrip()
+    file_content = file.read().rstrip().split("\n")
+    sheet_string = file_content[0]
+    password = file_content[1]
+
+@app.post("/authenticate/")
+async def authenticate(request: Request):
+    json = await request.json()
+    input_password = json["input_password"]
+    return {"status": "success" if input_password == password else "error"}
 
 @app.get("/kanban-data/")
 async def get_kanban_data(
+    request: Request,
     sheet_id: str = Query(
         sheet_string, 
         description="ID da planilha Google"
     )
 ):
+    if (request.headers.get('password') != password): return {"status": "error"}
     try:
         print(f"ID da planilha recebido: {sheet_id}")
         

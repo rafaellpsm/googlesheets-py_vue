@@ -1,4 +1,12 @@
 <template>
+    <div v-if="!logged" style="color: black">
+        <form @submit.prevent="tentarLogin">
+            <h2>{{ error }}</h2>
+            Senha de acesso: <input type="password" v-model="input_password" :disabled="logging"><br>
+            <input type="Submit" value="Enviar" :disabled="logging">
+        </form>
+    </div>
+    <h2 v-if="loading" style="color: black">Carregando...</h2>
     <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category">
         <div class="category-header">
             <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
@@ -33,9 +41,40 @@ export default {
     data() {
         return {
             kanbanData: {},
+            logged: false,
+            logging: false,
+            loading: false,
+            error: "",
+            input_password: "",
         };
     },
     computed: {
+        async tentarLogin() {
+            this.logging = true;
+            try {
+                const response = await fetch("http://" + window.location.hostname + ":8000/authenticate/", {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({"input_password": this.input_password})
+                });
+                const data = await response.json();
+
+                if (data["status"] == "success") {
+                    this.logged = true;
+                    this.updateKanbanData()
+                } else {
+                    this.error = "Senha incorreta."
+                    this.input_password = ""
+                }
+            } catch (error) {
+                console.error(error);
+                this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+            }
+            this.logging = false;
+        },
         sortedKanbanData() {
             const sortedData = {};
             for (const [category, cards] of Object.entries(this.kanbanData)) {
@@ -64,21 +103,41 @@ export default {
     },
     methods: {
         async updateKanbanData() {
-            try {
-                const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/");
-                const data = await response.json();
-                console.log("Dados recebidos:", data);
-                this.kanbanData = data;
-            } catch (error) {
-                console.error("Erro ao buscar dados:", error);
+            if (this.logged) {
+                this.loading = true;
+                try {
+                    const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/", {
+                        headers: {
+                            "password": this.input_password
+                        }
+                    });
+                    const data = await response.json();
+                    console.log("Dados recebidos:", data);
+                    if (data["status"] == "error") {
+                        this.logged = false;
+                        this.error = "O login expirou; favor realizar login novamente."
+                        this.kanbanData = {}
+                        this.input_password = ""
+                    } else {
+                        this.kanbanData = data;
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar dados:", error);
+                    this.logged = false;
+                    this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+                    this.kanbanData = {}
+                    this.input_password = ""
+                } finally {
+                    this.loading = false;
+                }
             }
         }
     },
     async mounted() {
-        this.updateKanbanData()
         setInterval(() => {
             this.updateKanbanData()
         }, 60000);
+
     },
 };
 </script>
