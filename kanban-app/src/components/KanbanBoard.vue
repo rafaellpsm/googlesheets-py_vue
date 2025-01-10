@@ -1,18 +1,26 @@
 <template>
-    <div v-if="!logged" style="color: black">
-        <form @submit.prevent="tentarLogin">
-            <h2>{{ error }}</h2>
-            Senha de acesso: <input type="password" v-model="input_password" :disabled="logging"><br>
-            <input type="Submit" value="Enviar" :disabled="logging">
+    <h1 v-if="!logged" style="color: #444;">Painel Leitos HMC</h1>
+    <div v-if="!logged" class="login-container">
+        <form @submit.prevent="tentarLogin" class="login-form">
+            <h2 class="error-message">{{ error }}</h2>
+            <div class="form-group">
+                <label for="password" style="color: #444;">Senha de acesso:</label>
+                <input id="password" type="password" v-model="input_password" :disabled="logging" class="input-field"
+                    placeholder="Digite sua senha">
+            </div>
+            <button type="submit" :disabled="logging" class="submit-button">
+                Enviar
+            </button>
         </form>
     </div>
+
     <h2 v-if="loading" style="color: black">Carregando...</h2>
     <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category">
         <div class="category-header">
             <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
             <div class="kanban-cards">
                 <div class="kanban-card" v-for="(card, index) in cards" :key="index"
-                    :class="{ highlight: card.NecessarioAIH === 'Sim' }">
+                    :class="{ highlight: card.NecessarioAIH == 'Sim', highlight_yellow: card.TotalHoras >= 20, highlight_green: card.AIHFeita === 'Sim' }">
                     <div class="card-row texto-grande">
                         <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
                     </div>
@@ -58,7 +66,7 @@ export default {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({"input_password": this.input_password})
+                    body: JSON.stringify({ "input_password": this.input_password })
                 });
                 const data = await response.json();
 
@@ -226,6 +234,16 @@ export default {
     background-color: #ffe6e6;
 }
 
+.kanban-card.highlight_yellow {
+    border-color: #ffee00;
+    background-color: #ffffe6;
+}
+
+.kanban-card.highlight_green {
+    border-color: #00ff00;
+    background-color: #e9ffe6;
+}
+
 .card-row {
     display: flex;
     justify-content: space-between;
@@ -239,5 +257,79 @@ export default {
 
 .texto-grande {
     font-size: 23px;
+}
+
+/* Login form Rafa Teste*/
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.login-form {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.label {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    color: #333;
+    background-color: #ddd;
+}
+
+.input-field:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.submit-button {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #2980b9;
+}
+
+.submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
 }
 </style>

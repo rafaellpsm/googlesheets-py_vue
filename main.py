@@ -60,7 +60,8 @@ async def get_kanban_data(
             "Leito", 
             "Pendências", 
             "Tempo de Perm.", 
-            "Necessário fazer AIH?"
+            "Necessário fazer AIH?",
+            "AIH Feita?"
         ]]
 
         kanban_data = {"Masculino": [], "Feminino": [], "Infantil": []}
@@ -81,7 +82,8 @@ async def get_kanban_data(
                 "Leito": leito_formatado,
                 "Pendencia": row.get("Pendências", "Nenhuma"),
                 "TotalHoras": row.get("Tempo de Perm.", "0"),
-                "NecessarioAIH": row.get("Necessário fazer AIH?", "Não")
+                "NecessarioAIH": row.get("Necessário fazer AIH?", "Não"),
+                "AIHFeita": row.get("AIH Feita?", "Não")
             }
 
             kanban_data[categoria].append(card)
