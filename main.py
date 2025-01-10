@@ -65,12 +65,12 @@ async def get_kanban_data(
             "AIH Feita?"
         ]]
 
-        kanban_data = {"Masculino": [], "Feminino": [], "Infantil": []}
+        kanban_data = {"MASCULINO": [], "FEMININO": [], "INFANTIL": []}
 
         for _, row in df.iterrows():
             # Determinar categoria
             leito_original = row.get("Leito", "")
-            categoria = "Infantil" if "Pediatria" in leito_original else ("Masculino" if "Masculino" in leito_original else "Feminino")
+            categoria = "INFANTIL" if "P" in leito_original else ("MASCULINO" if "M" in leito_original else "FEMININO" if "F" in leito_original else "")
             
             # Formatar valor do leito
             leito_formatado = f"Leito {''.join(filter(str.isdigit, leito_original))}" if leito_original else "Leito Não informado"

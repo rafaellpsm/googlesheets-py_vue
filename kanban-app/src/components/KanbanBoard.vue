@@ -21,7 +21,7 @@
             <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
             <div class="kanban-cards">
                 <div class="kanban-card" v-for="(card, index) in cards" :key="index"
-                    :class="{ highlight: card.NecessarioAIH == 'Sim', highlight_yellow: card.TotalHoras >= 20, highlight_green: card.AIHFeita === 'Sim' }">
+                    :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
                     <div class="card-row texto-grande">
                         <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
                     </div>
@@ -98,11 +98,11 @@ export default {
         categoryClass() {
             return (category) => {
                 switch (category) {
-                    case 'Masculino':
+                    case 'MASCULINO':
                         return 'category-masculino';
-                    case 'Feminino':
+                    case 'FEMININO':
                         return 'category-feminino';
-                    case 'Infantil':
+                    case 'INFANTIL':
                         return 'category-infantil';
                     default:
                         return '';
@@ -200,16 +200,19 @@ export default {
 .category-masculino {
     background-color: rgb(65, 65, 243);
     color: white;
+    font-size: 26px;
 }
 
 .category-feminino {
     background-color: rgb(134, 33, 33);
     color: white;
+    font-size: 26px;
 }
 
 .category-infantil {
     background-color: #4caf50;
     color: white;
+    font-size: 26px;
 }
 
 .kanban-cards {
@@ -234,7 +237,7 @@ export default {
     border: 1px solid #ddd;
 }
 
-.kanban-card.highlight {
+.kanban-card.highlight_red {
     border-color: #ff0000;
     background-color: #ffe6e6;
 }
