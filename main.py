@@ -2,6 +2,7 @@ from fastapi import Request, FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import gspread
 import pandas as pd
+import traceback
 
 app = FastAPI()
 
@@ -91,4 +92,5 @@ async def get_kanban_data(
         return kanban_data
 
     except Exception as e:
-        return {"error": str(e)}
+        traceback.print_exc()
+        return {"error": traceback.format_exc()}

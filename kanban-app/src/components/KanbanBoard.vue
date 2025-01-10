@@ -128,6 +128,11 @@ export default {
                         this.error = "O login expirou; favor realizar login novamente."
                         this.kanbanData = {}
                         this.input_password = ""
+                    } else if ("error" in data) {
+                        this.logged = false;
+                        this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+                        this.kanbanData = {}
+                        this.input_password = ""
                     } else {
                         this.kanbanData = data;
                     }
