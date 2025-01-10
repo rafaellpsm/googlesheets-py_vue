@@ -14,7 +14,9 @@
         </form>
     </div>
 
-    <h2 v-if="loading" style="color: black">Carregando...</h2>
+    <h2 v-if="loading && !logged" style="color: black">Carregando...</h2>
+
+
     <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category">
         <div class="category-header">
             <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
@@ -30,10 +32,10 @@
                     <div class="card-row texto-grande">
                         <span><strong>{{ card.Leito || "N/A" }}</strong></span>
                     </div>
-                    <div class="card-row">
+                    <div class="card-row texto_medio">
                         <span><strong>Hipótese:</strong> {{ card.Hipotese || "N/A" }}</span>
                     </div>
-                    <div class="card-row">
+                    <div class="card-row texto_medio">
                         <span><strong>Pendência:</strong> {{ card.Pendencia || "Nenhuma" }}</span>
                     </div>
 
@@ -167,15 +169,14 @@ export default {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 5px;
-    width: 100%;
-    min-height: 21vh;
+    min-height: 26vh;
 }
 
 .category-header {
     display: flex;
     flex-direction: row;
     width: 100%;
-    min-height: 21vh;
+    min-height: 26vh;
 }
 
 .category-title {
@@ -256,7 +257,11 @@ export default {
 }
 
 .texto-grande {
-    font-size: 23px;
+    font-size: 22px;
+}
+
+.texto_medio {
+    font-size: 18px;
 }
 
 /* Login form Rafa Teste*/
