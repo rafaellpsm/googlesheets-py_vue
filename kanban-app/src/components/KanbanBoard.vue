@@ -14,8 +14,7 @@
         </form>
     </div>
 
-    <h2 v-if="loading && !logged" style="color: black">Carregando...</h2>
-
+    <h2 v-if="loading && Object.keys(kanbanData).length === 0" style="color: black">Carregando...</h2>
 
     <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category">
         <div class="category-header">
