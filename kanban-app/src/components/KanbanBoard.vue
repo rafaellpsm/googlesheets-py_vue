@@ -125,8 +125,8 @@ export default {
             const sortedData = {};
             for (const [category, cards] of Object.entries(this.kanbanData)) {
                 sortedData[category] = cards.sort((a, b) => {
-                    const leitoA = parseInt(a.Leito.match(/\d+/) || 0);
-                    const leitoB = parseInt(b.Leito.match(/\d+/) || 0);
+                    const leitoA = parseInt(a.Leito.match(/\d+/) || 999);
+                    const leitoB = parseInt(b.Leito.match(/\d+/) || 999);
                     return leitoA - leitoB;
                 });
             }
