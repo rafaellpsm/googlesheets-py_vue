@@ -73,10 +73,10 @@ async def get_kanban_data(
             categoria = "INFANTIL" if "P" in leito_original else ("MASCULINO" if "M" in leito_original else "FEMININO" if "F" in leito_original else "")
             
             # Formatar valor do leito
-            leito_formatado = f"Leito {''.join(filter(str.isdigit, leito_original))}" if leito_original else "Leito Não informado"
+            leito_formatado = f"Leito {leito_original[1:].replace('_','').capitalize()}" if leito_original else "Leito Não informado"
             
             card = {
-                "Nome": row.get("Nome do Paciente", "Desconhecido"),
+                "Nome": row.get("Nome do Paciente", ""),
                 "Idade": row.get("Idade", "Não informado"),
                 # "Sexo": row.get("Sexo", "Não informado"),
                 "Hipotese": row.get("Hipótese Diagnóstica", "Não informado"),
