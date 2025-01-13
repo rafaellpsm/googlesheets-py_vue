@@ -28,7 +28,7 @@
                     :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
                     <div v-if="card.Nome">
                         <div class="card-row texto-grande">
-                            <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
+                            <span>{{ card.Nome ? (card.Nome + (card.Idade ? ", " + card.Idade : "")) : "" }}</span>
                         </div>
                         <div class="card-row texto-grande">
                             <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
@@ -70,7 +70,7 @@
                         <span>{{ card.HoraAdmissao }}</span>
                     </div>
                     <div class="card-row texto-grande table-cell">
-                        <span>{{ card.Nome ? (card.Nome + ", " + card.Idade) : "" }}</span>
+                        <span>{{ card.Nome ? (card.Nome + (card.Idade ? ", " + card.Idade : "")) : "" }}</span>
                     </div>
                     <div class="card-row texto_medio table-cell">
                         <span><strong>{{ card.Hipotese ? "HD:" : "" }}</strong> {{ card.Hipotese }}</span>
