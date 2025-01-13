@@ -1,26 +1,70 @@
 <template>
-    <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category">
+    <button @click="tableView = !tableView" class="button_change" v-if="Object.keys(kanbanData).length > 0">
+        {{ tableView ? "Ver Cards" : "Ver Tabela" }}</button>
+
+    <h2 v-if="loading && Object.keys(kanbanData).length === 0" style="color: black">Carregando...</h2>
+
+    <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="!tableView">
         <div class="category-header">
             <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
             <div class="kanban-cards">
                 <div class="kanban-card" v-for="(card, index) in cards" :key="index"
-                    :class="{ highlight: card.NecessarioAIH === 'Sim' }">
-                    <div class="card-row texto-grande">
-                        <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
+                    :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
+                    <div v-if="card.Nome">
+                        <div class="card-row texto-grande">
+                            <span>{{ card.Nome ? (card.Nome + (card.Idade ? ", " + card.Idade : "")) : "" }}</span>
+                        </div>
+                        <div class="card-row texto-grande">
+                            <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
+                        </div>
+                        <div class="card-row texto-grande">
+                            <span><strong>{{ card.Leito }}</strong></span>
+                        </div>
+                        <div class="card-row texto_medio">
+                            <span><strong>{{ card.Hipotese ? "HD:" : "" }}</strong> {{ card.Hipotese }}</span>
+                        </div>
+                        <div class="card-row texto_medio">
+                            <span><strong>{{ card.Pendencia ? "Pendência:" : "" }}</strong> {{ card.Pendencia }}</span>
+                        </div>
                     </div>
-                    <div class="card-row texto-grande">
-                        <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
+                    <div v-else>
+                        <div class="leito_livre">
+                            <p><strong>{{ card.Leito }}</strong></p>
+                            <h1 style="color: green;">Livre</h1>
+                        </div>
                     </div>
-                    <div class="card-row texto-grande">
-                        <span><strong>Leito:</strong> {{ card.Leito || "N/A" }}</span>
-                    </div>
-                    <div class="card-row">
-                        <span><strong>Hipótese:</strong> {{ card.Hipotese || "N/A" }}</span>
-                    </div>
-                    <div class="card-row">
-                        <span><strong>Pendência:</strong> {{ card.Pendencia || "Nenhuma" }}</span>
-                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="table-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="tableView">
+        <div class="category-header table-header">
+            <div :class="['table-title', 'table-cell', categoryClass(category)]">{{ category }}</div>
+            <div class="kanban-cards table-view">
+                <div class="kanban-card table-row" v-for="(card, index) in cards" :key="index"
+                    :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
+                    <div class="card-row texto-grande table-cell">
+                        <span><strong>{{ card.Leito }}</strong></span>
+                    </div>
+                    <div class="card-row texto-grande table-cell">
+                        <span>{{ card.DataAdmissao }}</span>
+                    </div>
+                    <div class="card-row texto-grande table-cell">
+                        <span>{{ card.HoraAdmissao }}</span>
+                    </div>
+                    <div class="card-row texto-grande table-cell">
+                        <span>{{ card.Nome ? (card.Nome + (card.Idade ? ", " + card.Idade : "")) : "" }}</span>
+                    </div>
+                    <div class="card-row texto_medio table-cell">
+                        <span><strong>{{ card.Hipotese ? "HD:" : "" }}</strong> {{ card.Hipotese }}</span>
+                    </div>
+                    <div class="card-row texto_medio table-cell">
+                        <span><strong>{{ card.Pendencia ? "Pendência:" : "" }}</strong> {{ card.Pendencia }}</span>
+                    </div>
+                    <div class="card-row texto-grande table-cell">
+                        <span> {{ card.TotalHoras || "0" }} <strong>Horas</strong></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -32,7 +76,9 @@ export default {
     name: "KanbanView",
     data() {
         return {
+            tableView: false,
             kanbanData: {},
+            loading: false,
         };
     },
     computed: {
@@ -40,8 +86,8 @@ export default {
             const sortedData = {};
             for (const [category, cards] of Object.entries(this.kanbanData)) {
                 sortedData[category] = cards.sort((a, b) => {
-                    const leitoA = parseInt(a.Leito.match(/\d+/) || 0);
-                    const leitoB = parseInt(b.Leito.match(/\d+/) || 0);
+                    const leitoA = parseInt(a.Leito.match(/\d+/) || 999);
+                    const leitoB = parseInt(b.Leito.match(/\d+/) || 999);
                     return leitoA - leitoB;
                 });
             }
@@ -50,11 +96,11 @@ export default {
         categoryClass() {
             return (category) => {
                 switch (category) {
-                    case 'Masculino':
+                    case 'MASCULINO':
                         return 'category-masculino';
-                    case 'Feminino':
+                    case 'FEMININO':
                         return 'category-feminino';
-                    case 'Infantil':
+                    case 'INFANTIL':
                         return 'category-infantil';
                     default:
                         return '';
@@ -64,6 +110,7 @@ export default {
     },
     methods: {
         async updateKanbanData() {
+            this.loading = true;
             try {
                 const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/");
                 const data = await response.json();
@@ -71,6 +118,8 @@ export default {
                 this.kanbanData = data;
             } catch (error) {
                 console.error("Erro ao buscar dados:", error);
+            } finally {
+                this.loading = false;
             }
         }
     },
@@ -91,6 +140,21 @@ export default {
     overflow-x: hidden;
 }
 
+.button_change {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
 .kanban-category {
     display: flex;
     flex-direction: row;
@@ -100,15 +164,26 @@ export default {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 5px;
-    width: 100%;
-    min-height: 21vh;
+    min-height: 26vh;
+}
+
+.table-category {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 5px;
+    min-height: 26vh;
 }
 
 .category-header {
     display: flex;
     flex-direction: row;
     width: 100%;
-    min-height: 21vh;
+    min-height: 26vh;
 }
 
 .category-title {
@@ -125,26 +200,42 @@ export default {
     white-space: nowrap;
 }
 
+.table-title {
+    text-align: center;
+    padding: 10px 5px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    white-space: nowrap;
+}
+
 .category-masculino {
     background-color: rgb(65, 65, 243);
     color: white;
+    font-size: 26px;
 }
 
 .category-feminino {
     background-color: rgb(134, 33, 33);
     color: white;
+    font-size: 26px;
 }
 
 .category-infantil {
     background-color: #4caf50;
     color: white;
+    font-size: 26px;
 }
 
 .kanban-cards {
     display: flex;
     flex-wrap: nowrap;
     gap: 10px;
-    overflow-x: auto;
+    overflow-x: hidden;
     width: 100%;
     padding-left: 10px;
 }
@@ -162,14 +253,23 @@ export default {
     border: 1px solid #ddd;
 }
 
-.kanban-card.highlight {
+.kanban-card.highlight_red {
     border-color: #ff0000;
     background-color: #ffe6e6;
 }
 
+.kanban-card.highlight_yellow {
+    border-color: #ffee00;
+    background-color: #ffffe6;
+}
+
+.kanban-card.highlight_green {
+    border-color: #00ff00;
+    background-color: #e9ffe6;
+}
+
 .card-row {
-    display: flex;
-    justify-content: space-between;
+    text-align: left;
     font-size: 15.125px;
     color: #333;
 }
@@ -178,7 +278,45 @@ export default {
     color: #555;
 }
 
+.leito_livre {
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    color: #333;
+}
+
 .texto-grande {
-    font-size: 23px;
+    font-size: 22px;
+}
+
+.texto_medio {
+    font-size: 18px;
+}
+
+.table-view {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-header {
+    display: table-header-group;
+    background-color: #f2f2f2;
+}
+
+.table-row {
+    display: table-row;
+}
+
+.table-cell {
+    display: table-cell;
+    padding: 8.5px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.table-cell-header {
+    font-weight: bold;
+    background-color: #f9f9f9;
 }
 </style>

@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import gspread
 import pandas as pd
+import traceback
 
 app = FastAPI()
 
@@ -31,10 +32,10 @@ async def get_kanban_data(
         sheet = gc.open_by_key(sheet_id).sheet1
 
         expected_headers = [
-            "Data admissão", "Hora admissão", "Data e hora completa", "Prontuário SIGSS",
-            "Nome do Paciente", "Data de Nascimento", "Idade", "Sexo", 
+            "Data de admissão", "Hora admissão",
+            "Nome do Paciente", "Idade", "Sexo", 
             "Hipótese Diagnóstica", "Leito", "Pendências", 
-            "Total de horas de admissão", "Necessário fazer AIH?", "AIH Feita?"
+            "Tempo de Perm.", "Necessário fazer AIH?", "AIH Feita?"
         ]
 
         records = sheet.get_all_records(expected_headers=expected_headers)
@@ -42,35 +43,41 @@ async def get_kanban_data(
         df = pd.DataFrame(records)
 
         df = df[[
-            "Nome do Paciente", 
+            "Nome do Paciente",
+            "Data de admissão",
+            "Hora admissão",
             "Idade", 
             "Sexo", 
             "Hipótese Diagnóstica", 
             "Leito", 
             "Pendências", 
-            "Total de horas de admissão", 
-            "Necessário fazer AIH?"
+            "Tempo de Perm.", 
+            "Necessário fazer AIH?",
+            "AIH Feita?"
         ]]
 
-        kanban_data = {"Masculino": [], "Feminino": [], "Infantil": []}
+        kanban_data = {"MASCULINO": [], "FEMININO": [], "INFANTIL": []}
 
         for _, row in df.iterrows():
             # Determinar categoria
             leito_original = row.get("Leito", "")
-            categoria = "Infantil" if "Pediatria" in leito_original else ("Masculino" if "Masculino" in leito_original else "Feminino")
+            categoria = "INFANTIL" if "P" in leito_original else ("MASCULINO" if "M" in leito_original else "FEMININO" if "F" in leito_original else "")
             
             # Formatar valor do leito
-            leito_formatado = f"Leito {''.join(filter(str.isdigit, leito_original))}" if leito_original else "Leito Não informado"
+            leito_formatado = f"Leito {leito_original[1:].replace('_','').capitalize()}" if leito_original else "Leito Não informado"
             
             card = {
-                "Nome": row.get("Nome do Paciente", "Desconhecido"),
+                "Nome": row.get("Nome do Paciente", ""),
                 "Idade": row.get("Idade", "Não informado"),
+                "HoraAdmissao": row.get("Hora admissão", "Não informado"),
+                "DataAdmissao": row.get("Data de admissão", "Não informado"),
                 # "Sexo": row.get("Sexo", "Não informado"),
                 "Hipotese": row.get("Hipótese Diagnóstica", "Não informado"),
                 "Leito": leito_formatado,
                 "Pendencia": row.get("Pendências", "Nenhuma"),
-                "TotalHoras": row.get("Total de horas de admissão", "0"),
-                "NecessarioAIH": row.get("Necessário fazer AIH?", "Não")
+                "TotalHoras": row.get("Tempo de Perm.", "0"),
+                "NecessarioAIH": row.get("Necessário fazer AIH?", "Não"),
+                "AIHFeita": row.get("AIH Feita?", "Não")
             }
 
             kanban_data[categoria].append(card)
@@ -78,4 +85,5 @@ async def get_kanban_data(
         return kanban_data
 
     except Exception as e:
-        return {"error": str(e)}
+        traceback.print_exc()
+        return {"error": traceback.format_exc()}
