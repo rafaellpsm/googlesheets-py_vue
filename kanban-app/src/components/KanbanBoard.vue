@@ -121,9 +121,6 @@ export default {
             } finally {
                 this.loading = false;
             }
-        },
-        handleButtonClick() {
-            console.log("Botão clicado!");
         }
     },
     async mounted() {
@@ -131,7 +128,6 @@ export default {
         setInterval(() => {
             this.updateKanbanData()
         }, 60000);
-
     },
 };
 </script>
@@ -295,56 +291,6 @@ export default {
 
 .texto_medio {
     font-size: 18px;
-}
-
-/* Login form Rafa Teste*/
-
-.login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-}
-
-.login-form {
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 100%;
-    max-width: 400px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.label {
-    font-size: 14px;
-    color: #ccc;
-}
-
-.submit-button {
-    width: 100%;
-    padding: 10px 15px;
-    background-color: #3498db;
-    color: #ffffff;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.submit-button:hover {
-    background-color: #2980b9;
-}
-
-.submit-button:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
 }
 
 .table-view {
