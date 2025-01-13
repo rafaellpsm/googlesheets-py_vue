@@ -15,7 +15,7 @@
     </div>
 
     <button @click="tableView = !tableView" class="button_change" v-if="logged && Object.keys(kanbanData).length > 0">
-        Botão</button>
+        {{ tableView ? "Ver Cards" : "Ver Tabela" }}</button>
 
     <h2 v-if="loading && Object.keys(kanbanData).length === 0" style="color: black">Carregando...</h2>
 
