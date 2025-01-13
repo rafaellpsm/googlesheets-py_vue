@@ -1,4 +1,4 @@
-from fastapi import Request, FastAPI, Query
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import gspread
 import pandas as pd
@@ -21,7 +21,6 @@ with open('sheet_id.txt', 'r') as file:
 
 @app.get("/kanban-data/")
 async def get_kanban_data(
-    request: Request,
     sheet_id: str = Query(
         sheet_string, 
         description="ID da planilha Google"
