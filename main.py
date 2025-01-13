@@ -54,7 +54,9 @@ async def get_kanban_data(
         df = pd.DataFrame(records)
 
         df = df[[
-            "Nome do Paciente", 
+            "Nome do Paciente",
+            "Data de admissão",
+            "Hora admissão",
             "Idade", 
             "Sexo", 
             "Hipótese Diagnóstica", 
@@ -78,6 +80,8 @@ async def get_kanban_data(
             card = {
                 "Nome": row.get("Nome do Paciente", "Desconhecido"),
                 "Idade": row.get("Idade", "Não informado"),
+                "HoraAdmissao": row.get("Hora admissão", "Não informado"),
+                "DataAdmissao": row.get("Data de admissão", "Não informado"),
                 # "Sexo": row.get("Sexo", "Não informado"),
                 "Hipotese": row.get("Hipótese Diagnóstica", "Não informado"),
                 "Leito": leito_formatado,

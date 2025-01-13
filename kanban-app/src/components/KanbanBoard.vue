@@ -14,7 +14,11 @@
         </form>
     </div>
 
+    <button @click="tableView = !tableView" class="button_change" v-if="logged && Object.keys(kanbanData).length > 0">
+        Botão</button>
+
     <h2 v-if="loading && Object.keys(kanbanData).length === 0" style="color: black">Carregando...</h2>
+
 
     <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="!tableView">
         <div class="category-header">
@@ -43,28 +47,33 @@
         </div>
     </div>
 
-    <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="tableView">
-        <div class="category-header">
-            <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
-            <div class="kanban-cards">
-                <div class="kanban-card" v-for="(card, index) in cards" :key="index"
+    <div class="table-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="tableView">
+        <div class="category-header table-header">
+            <div :class="['table-title', 'table-cell', categoryClass(category)]">{{ category }}</div>
+            <div class="kanban-cards table-view">
+                <div class="kanban-card table-row" v-for="(card, index) in cards" :key="index"
                     :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
-                    <div class="card-row texto-grande">
-                        <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
+                    <div class="card-row texto-grande table-cell">
+                        <span><strong>{{ card.Leito }}</strong></span>
                     </div>
-                    <div class="card-row texto-grande">
-                        <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
+                    <div class="card-row texto-grande table-cell">
+                        <span>{{ card.DataAdmissao }}</span>
                     </div>
-                    <div class="card-row texto-grande">
-                        <span><strong>{{ card.Leito || "N/A" }}</strong></span>
+                    <div class="card-row texto-grande table-cell">
+                        <span>{{ card.HoraAdmissao }}</span>
                     </div>
-                    <div class="card-row texto_medio">
-                        <span><strong>Hipótese:</strong> {{ card.Hipotese || "N/A" }}</span>
+                    <div class="card-row texto-grande table-cell">
+                        <span>{{ card.Nome }}, {{ card.Idade }}</span>
                     </div>
-                    <div class="card-row texto_medio">
+                    <div class="card-row texto_medio table-cell">
+                        <span><strong>HD:</strong> {{ card.Hipotese || "N/A" }}</span>
+                    </div>
+                    <div class="card-row texto_medio table-cell">
                         <span><strong>Pendência:</strong> {{ card.Pendencia || "Nenhuma" }}</span>
                     </div>
-
+                    <div class="card-row texto-grande table-cell">
+                        <span> {{ card.TotalHoras || "0" }} <strong>Horas</strong></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -173,6 +182,9 @@ export default {
                     this.loading = false;
                 }
             }
+        },
+        handleButtonClick() {
+            console.log("Botão clicado!");
         }
     },
     async mounted() {
@@ -192,7 +204,34 @@ export default {
     overflow-x: hidden;
 }
 
+.button_change {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
 .kanban-category {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 5px;
+    min-height: 26vh;
+}
+
+.table-category {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -213,6 +252,19 @@ export default {
 
 .category-title {
     writing-mode: vertical-rl;
+    text-align: center;
+    padding: 10px 5px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    white-space: nowrap;
+}
+
+.table-title {
     text-align: center;
     padding: 10px 5px;
     border-radius: 8px;
@@ -371,5 +423,32 @@ export default {
 .submit-button:disabled {
     background-color: #bdc3c7;
     cursor: not-allowed;
+}
+
+.table-view {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-header {
+    display: table-header-group;
+    background-color: #f2f2f2;
+}
+
+.table-row {
+    display: table-row;
+}
+
+.table-cell {
+    display: table-cell;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.table-cell-header {
+    font-weight: bold;
+    background-color: #f9f9f9;
 }
 </style>
