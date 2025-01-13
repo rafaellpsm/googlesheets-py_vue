@@ -59,11 +59,9 @@ async def get_kanban_data(
         kanban_data = {"MASCULINO": [], "FEMININO": [], "INFANTIL": []}
 
         for _, row in df.iterrows():
-            # Determinar categoria
             leito_original = row.get("Leito", "")
             categoria = "INFANTIL" if "P" in leito_original else ("MASCULINO" if "M" in leito_original else "FEMININO" if "F" in leito_original else "")
-            
-            # Formatar valor do leito
+
             leito_formatado = f"Leito {leito_original[1:].replace('_','').capitalize()}" if leito_original else "Leito Não informado"
             
             card = {
