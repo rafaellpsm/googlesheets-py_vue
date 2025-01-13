@@ -48,7 +48,7 @@
             <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
             <div class="kanban-cards">
                 <div class="kanban-card" v-for="(card, index) in cards" :key="index"
-                    :class="{ highlight: card.NecessarioAIH === 'Sim' }">
+                    :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
                     <div class="card-row texto-grande">
                         <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
                     </div>
@@ -56,12 +56,12 @@
                         <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
                     </div>
                     <div class="card-row texto-grande">
-                        <span><strong>Leito:</strong> {{ card.Leito || "N/A" }}</span>
+                        <span><strong>{{ card.Leito || "N/A" }}</strong></span>
                     </div>
-                    <div class="card-row">
+                    <div class="card-row texto_medio">
                         <span><strong>Hipótese:</strong> {{ card.Hipotese || "N/A" }}</span>
                     </div>
-                    <div class="card-row">
+                    <div class="card-row texto_medio">
                         <span><strong>Pendência:</strong> {{ card.Pendencia || "Nenhuma" }}</span>
                     </div>
 
@@ -78,9 +78,40 @@ export default {
         return {
             tableView: false,
             kanbanData: {},
+            logged: false,
+            logging: false,
+            loading: false,
+            error: "",
+            input_password: "",
         };
     },
     computed: {
+        async tentarLogin() {
+            this.logging = true;
+            try {
+                const response = await fetch("http://" + window.location.hostname + ":8000/authenticate/", {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ "input_password": this.input_password })
+                });
+                const data = await response.json();
+
+                if (data["status"] == "success") {
+                    this.logged = true;
+                    this.updateKanbanData()
+                } else {
+                    this.error = "Senha incorreta."
+                    this.input_password = ""
+                }
+            } catch (error) {
+                console.error(error);
+                this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+            }
+            this.logging = false;
+        },
         sortedKanbanData() {
             const sortedData = {};
             for (const [category, cards] of Object.entries(this.kanbanData)) {
@@ -95,11 +126,11 @@ export default {
         categoryClass() {
             return (category) => {
                 switch (category) {
-                    case 'Masculino':
+                    case 'MASCULINO':
                         return 'category-masculino';
-                    case 'Feminino':
+                    case 'FEMININO':
                         return 'category-feminino';
-                    case 'Infantil':
+                    case 'INFANTIL':
                         return 'category-infantil';
                     default:
                         return '';
@@ -109,21 +140,46 @@ export default {
     },
     methods: {
         async updateKanbanData() {
-            try {
-                const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/");
-                const data = await response.json();
-                console.log("Dados recebidos:", data);
-                this.kanbanData = data;
-            } catch (error) {
-                console.error("Erro ao buscar dados:", error);
+            if (this.logged) {
+                this.loading = true;
+                try {
+                    const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/", {
+                        headers: {
+                            "password": this.input_password
+                        }
+                    });
+                    const data = await response.json();
+                    console.log("Dados recebidos:", data);
+                    if (data["status"] == "error") {
+                        this.logged = false;
+                        this.error = "O login expirou; favor realizar login novamente."
+                        this.kanbanData = {}
+                        this.input_password = ""
+                    } else if ("error" in data) {
+                        this.logged = false;
+                        this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+                        this.kanbanData = {}
+                        this.input_password = ""
+                    } else {
+                        this.kanbanData = data;
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar dados:", error);
+                    this.logged = false;
+                    this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+                    this.kanbanData = {}
+                    this.input_password = ""
+                } finally {
+                    this.loading = false;
+                }
             }
         }
     },
     async mounted() {
-        this.updateKanbanData()
         setInterval(() => {
             this.updateKanbanData()
         }, 60000);
+
     },
 };
 </script>
@@ -145,15 +201,14 @@ export default {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 5px;
-    width: 100%;
-    min-height: 21vh;
+    min-height: 26vh;
 }
 
 .category-header {
     display: flex;
     flex-direction: row;
     width: 100%;
-    min-height: 21vh;
+    min-height: 26vh;
 }
 
 .category-title {
@@ -173,16 +228,19 @@ export default {
 .category-masculino {
     background-color: rgb(65, 65, 243);
     color: white;
+    font-size: 26px;
 }
 
 .category-feminino {
     background-color: rgb(134, 33, 33);
     color: white;
+    font-size: 26px;
 }
 
 .category-infantil {
     background-color: #4caf50;
     color: white;
+    font-size: 26px;
 }
 
 .kanban-cards {
@@ -207,9 +265,19 @@ export default {
     border: 1px solid #ddd;
 }
 
-.kanban-card.highlight {
+.kanban-card.highlight_red {
     border-color: #ff0000;
     background-color: #ffe6e6;
+}
+
+.kanban-card.highlight_yellow {
+    border-color: #ffee00;
+    background-color: #ffffe6;
+}
+
+.kanban-card.highlight_green {
+    border-color: #00ff00;
+    background-color: #e9ffe6;
 }
 
 .card-row {
@@ -224,6 +292,84 @@ export default {
 }
 
 .texto-grande {
-    font-size: 23px;
+    font-size: 22px;
+}
+
+.texto_medio {
+    font-size: 18px;
+}
+
+/* Login form Rafa Teste*/
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.login-form {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.label {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    color: #333;
+    background-color: #ddd;
+}
+
+.input-field:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.submit-button {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #2980b9;
+}
+
+.submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
 }
 </style>
