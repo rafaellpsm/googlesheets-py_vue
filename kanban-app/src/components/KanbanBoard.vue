@@ -1,5 +1,49 @@
 <template>
-    <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category">
+    <h1 v-if="!logged" style="color: #444;">Painel Leitos HMC</h1>
+    <div v-if="!logged" class="login-container">
+        <form @submit.prevent="tentarLogin" class="login-form">
+            <h2 class="error-message">{{ error }}</h2>
+            <div class="form-group">
+                <label for="password" style="color: #444;">Senha de acesso:</label>
+                <input id="password" type="password" v-model="input_password" :disabled="logging" class="input-field"
+                    placeholder="Digite sua senha">
+            </div>
+            <button type="submit" :disabled="logging" class="submit-button">
+                Enviar
+            </button>
+        </form>
+    </div>
+
+    <h2 v-if="loading && Object.keys(kanbanData).length === 0" style="color: black">Carregando...</h2>
+
+    <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="!tableView">
+        <div class="category-header">
+            <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
+            <div class="kanban-cards">
+                <div class="kanban-card" v-for="(card, index) in cards" :key="index"
+                    :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
+                    <div class="card-row texto-grande">
+                        <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
+                    </div>
+                    <div class="card-row texto-grande">
+                        <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
+                    </div>
+                    <div class="card-row texto-grande">
+                        <span><strong>{{ card.Leito || "N/A" }}</strong></span>
+                    </div>
+                    <div class="card-row texto_medio">
+                        <span><strong>Hipótese:</strong> {{ card.Hipotese || "N/A" }}</span>
+                    </div>
+                    <div class="card-row texto_medio">
+                        <span><strong>Pendência:</strong> {{ card.Pendencia || "Nenhuma" }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="tableView">
         <div class="category-header">
             <div :class="['category-title', categoryClass(category)]">{{ category }}</div>
             <div class="kanban-cards">
@@ -32,6 +76,7 @@ export default {
     name: "KanbanView",
     data() {
         return {
+            tableView: false,
             kanbanData: {},
         };
     },
