@@ -1,24 +1,8 @@
 <template>
-    <h1 v-if="!logged" style="color: #444;">Painel Leitos HMC</h1>
-    <div v-if="!logged" class="login-container">
-        <form @submit.prevent="tentarLogin" class="login-form">
-            <h2 class="error-message">{{ error }}</h2>
-            <div class="form-group">
-                <label for="password" style="color: #444;">Senha de acesso:</label>
-                <input id="password" type="password" v-model="input_password" :disabled="logging" class="input-field"
-                    placeholder="Digite sua senha">
-            </div>
-            <button type="submit" :disabled="logging" class="submit-button">
-                Enviar
-            </button>
-        </form>
-    </div>
-
-    <button @click="tableView = !tableView" class="button_change" v-if="logged && Object.keys(kanbanData).length > 0">
+    <button @click="tableView = !tableView" class="button_change" v-if="Object.keys(kanbanData).length > 0">
         {{ tableView ? "Ver Cards" : "Ver Tabela" }}</button>
 
     <h2 v-if="loading && Object.keys(kanbanData).length === 0" style="color: black">Carregando...</h2>
-
 
     <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="!tableView">
         <div class="category-header">
@@ -94,40 +78,10 @@ export default {
         return {
             tableView: false,
             kanbanData: {},
-            logged: false,
-            logging: false,
             loading: false,
-            error: "",
-            input_password: "",
         };
     },
     computed: {
-        async tentarLogin() {
-            this.logging = true;
-            try {
-                const response = await fetch("http://" + window.location.hostname + ":8000/authenticate/", {
-                    method: "POST",
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ "input_password": this.input_password })
-                });
-                const data = await response.json();
-
-                if (data["status"] == "success") {
-                    this.logged = true;
-                    this.updateKanbanData()
-                } else {
-                    this.error = "Senha incorreta."
-                    this.input_password = ""
-                }
-            } catch (error) {
-                console.error(error);
-                this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
-            }
-            this.logging = false;
-        },
         sortedKanbanData() {
             const sortedData = {};
             for (const [category, cards] of Object.entries(this.kanbanData)) {
@@ -156,38 +110,16 @@ export default {
     },
     methods: {
         async updateKanbanData() {
-            if (this.logged) {
-                this.loading = true;
-                try {
-                    const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/", {
-                        headers: {
-                            "password": this.input_password
-                        }
-                    });
-                    const data = await response.json();
-                    console.log("Dados recebidos:", data);
-                    if (data["status"] == "error") {
-                        this.logged = false;
-                        this.error = "O login expirou; favor realizar login novamente."
-                        this.kanbanData = {}
-                        this.input_password = ""
-                    } else if ("error" in data) {
-                        this.logged = false;
-                        this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
-                        this.kanbanData = {}
-                        this.input_password = ""
-                    } else {
-                        this.kanbanData = data;
-                    }
-                } catch (error) {
-                    console.error("Erro ao buscar dados:", error);
-                    this.logged = false;
-                    this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
-                    this.kanbanData = {}
-                    this.input_password = ""
-                } finally {
-                    this.loading = false;
-                }
+            this.loading = true;
+            try {
+                const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/");
+                const data = await response.json();
+                console.log("Dados recebidos:", data);
+                this.kanbanData = data;
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+            } finally {
+                this.loading = false;
             }
         },
         handleButtonClick() {
@@ -195,6 +127,7 @@ export default {
         }
     },
     async mounted() {
+        this.updateKanbanData()
         setInterval(() => {
             this.updateKanbanData()
         }, 60000);
@@ -383,13 +316,6 @@ export default {
     max-width: 400px;
 }
 
-.error-message {
-    color: #e74c3c;
-    font-size: 14px;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
 .form-group {
     margin-bottom: 15px;
 }
@@ -397,23 +323,6 @@ export default {
 .label {
     font-size: 14px;
     color: #ccc;
-}
-
-.input-field {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-    box-sizing: border-box;
-    color: #333;
-    background-color: #ddd;
-}
-
-.input-field:focus {
-    border-color: #3498db;
-    outline: none;
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
 }
 
 .submit-button {

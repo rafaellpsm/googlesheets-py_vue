@@ -16,17 +16,8 @@ app.add_middleware(
 
 gc = gspread.service_account("credenciais.json")
 sheet_string = ""
-password = ""
 with open('sheet_id.txt', 'r') as file:
-    file_content = file.read().rstrip().split("\n")
-    sheet_string = file_content[0]
-    password = file_content[1]
-
-@app.post("/authenticate/")
-async def authenticate(request: Request):
-    json = await request.json()
-    input_password = json["input_password"]
-    return {"status": "success" if input_password == password else "error"}
+    sheet_string = file.read().rstrip()
 
 @app.get("/kanban-data/")
 async def get_kanban_data(
@@ -36,7 +27,6 @@ async def get_kanban_data(
         description="ID da planilha Google"
     )
 ):
-    if (request.headers.get('password') != password): return {"status": "error"}
     try:
         print(f"ID da planilha recebido: {sheet_id}")
         
