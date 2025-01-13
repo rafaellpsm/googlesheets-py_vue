@@ -63,13 +63,13 @@
                         <span>{{ card.HoraAdmissao }}</span>
                     </div>
                     <div class="card-row texto-grande table-cell">
-                        <span>{{ card.Nome }}, {{ card.Idade }}</span>
+                        <span>{{ card.Nome ? (card.Nome + ", " + card.Idade) : "" }}</span>
                     </div>
                     <div class="card-row texto_medio table-cell">
-                        <span><strong>HD:</strong> {{ card.Hipotese || "N/A" }}</span>
+                        <span><strong>{{ card.Hipotese ? "HD:" : "" }}</strong> {{ card.Hipotese }}</span>
                     </div>
                     <div class="card-row texto_medio table-cell">
-                        <span><strong>Pendência:</strong> {{ card.Pendencia || "Nenhuma" }}</span>
+                        <span><strong>{{ card.Pendencia ? "Pendência:" : "" }}</strong> {{ card.Pendencia }}</span>
                     </div>
                     <div class="card-row texto-grande table-cell">
                         <span> {{ card.TotalHoras || "0" }} <strong>Horas</strong></span>
@@ -442,7 +442,7 @@ export default {
 
 .table-cell {
     display: table-cell;
-    padding: 10px;
+    padding: 8.5px;
     border: 1px solid #ddd;
     text-align: left;
 }
