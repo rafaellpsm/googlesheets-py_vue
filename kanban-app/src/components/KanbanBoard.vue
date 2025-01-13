@@ -299,7 +299,7 @@ export default {
     display: flex;
     flex-wrap: nowrap;
     gap: 10px;
-    overflow-x: auto;
+    overflow-x: hidden;
     width: 100%;
     padding-left: 10px;
 }
