@@ -26,22 +26,29 @@
             <div class="kanban-cards">
                 <div class="kanban-card" v-for="(card, index) in cards" :key="index"
                     :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
-                    <div class="card-row texto-grande">
-                        <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
+                    <div v-if="card.Nome">
+                        <div class="card-row texto-grande">
+                            <span>{{ card.Nome || "Desconhecido" }}, {{ card.Idade || "N/A" }}</span>
+                        </div>
+                        <div class="card-row texto-grande">
+                            <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
+                        </div>
+                        <div class="card-row texto-grande">
+                            <span><strong>{{ card.Leito }}</strong></span>
+                        </div>
+                        <div class="card-row texto_medio">
+                            <span><strong>{{ card.Hipotese ? "HD:" : "" }}</strong> {{ card.Hipotese }}</span>
+                        </div>
+                        <div class="card-row texto_medio">
+                            <span><strong>{{ card.Pendencia ? "Pendência:" : "" }}</strong> {{ card.Pendencia }}</span>
+                        </div>
                     </div>
-                    <div class="card-row texto-grande">
-                        <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
+                    <div v-else>
+                        <div class="leito_livre">
+                            <p><strong>{{ card.Leito }}</strong></p>
+                            <h1 style="color: green;">Livre</h1>
+                        </div>
                     </div>
-                    <div class="card-row texto-grande">
-                        <span><strong>{{ card.Leito || "N/A" }}</strong></span>
-                    </div>
-                    <div class="card-row texto_medio">
-                        <span><strong>Hipótese:</strong> {{ card.Hipotese || "N/A" }}</span>
-                    </div>
-                    <div class="card-row texto_medio">
-                        <span><strong>Pendência:</strong> {{ card.Pendencia || "Nenhuma" }}</span>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -333,14 +340,20 @@ export default {
 }
 
 .card-row {
-    display: flex;
-    justify-content: space-between;
+    text-align: left;
     font-size: 15.125px;
     color: #333;
 }
 
 .card-row strong {
     color: #555;
+}
+
+.leito_livre {
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    color: #333;
 }
 
 .texto-grande {
