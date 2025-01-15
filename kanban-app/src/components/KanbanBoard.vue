@@ -1,8 +1,24 @@
 <template>
-    <button @click="tableView = !tableView" class="button_change" v-if="Object.keys(kanbanData).length > 0">
+    <h1 v-if="!logged" style="color: #444;">Painel Leitos HMC</h1>
+    <div v-if="!logged" class="login-container">
+        <form @submit.prevent="tentarLogin" class="login-form">
+            <h2 class="error-message">{{ error }}</h2>
+            <div class="form-group">
+                <label for="password" style="color: #444;">Senha de acesso:</label>
+                <input id="password" type="password" v-model="input_password" :disabled="logging" class="input-field"
+                    placeholder="Digite sua senha">
+            </div>
+            <button type="submit" :disabled="logging" class="submit-button">
+                Enviar
+            </button>
+        </form>
+    </div>
+
+    <button @click="tableView = !tableView" class="button_change" v-if="logged && Object.keys(kanbanData).length > 0">
         {{ tableView ? "Ver Cards" : "Ver Tabela" }}</button>
 
     <h2 v-if="loading && Object.keys(kanbanData).length === 0" style="color: black">Carregando...</h2>
+
 
     <div class="kanban-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="!tableView">
         <div class="category-header">
@@ -12,14 +28,20 @@
                     :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
                     <div v-if="card.Nome">
                         <div class="card-row texto-grande">
-                            <span>{{ card.Nome ? (card.Nome + (card.Idade ? ", " + card.Idade : "")) : "" }}</span>
+                            <span><strong>{{ card.Leito }}</strong></span>
+                        </div>
+                        <div class="card-row texto-grande">
+                            <span>{{ card.Nome ? (nomeAbreviado(card.Nome) + (card.Idade ? ", " + card.Idade : "")) : ""
+                                }}</span>
+                        </div>
+                        <div class="card-row texto-grande">
+                            <span><strong>Admissão:</strong> {{ card.DataAdmissao + ", " +
+                                card.HoraAdmissao.slice(0, -3) }}</span>
                         </div>
                         <div class="card-row texto-grande">
                             <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
                         </div>
-                        <div class="card-row texto-grande">
-                            <span><strong>{{ card.Leito }}</strong></span>
-                        </div>
+
                         <div class="card-row texto_medio">
                             <span><strong>{{ card.Hipotese ? "HD:" : "" }}</strong> {{ card.Hipotese }}</span>
                         </div>
@@ -39,9 +61,35 @@
     </div>
 
     <div class="table-category" v-for="(cards, category) in sortedKanbanData" :key="category" v-if="tableView">
-        <div class="category-header table-header">
-            <div :class="['table-title', 'table-cell', categoryClass(category)]">{{ category }}</div>
+        <div class="category-header">
+            <div :class="['table-title', categoryClass(category)]">{{ category }}</div>
             <div class="kanban-cards table-view">
+                <div class="kanban-card table-row table-header-row">
+                    <div class="card-row texto-grande table-cell table-cell-header" style="width:100px">
+                        <span><strong>Leito</strong></span>
+                    </div>
+                    <div class="card-row texto-grande table-cell table-cell-header" style="width:130px">
+                        <span><strong>Dt.Admi</strong></span>
+                    </div>
+                    <div class="card-row texto-grande table-cell table-cell-header" style="width:100px">
+                        <span><strong>Hr.Admi</strong></span>
+                    </div>
+                    <div class="card-row texto-grande table-cell table-cell-header" style="width:220px">
+                        <span><strong>Paciente</strong></span>
+                    </div>
+                    <div class="card-row texto_medio table-cell table-cell-header" style="width:400px">
+                        <span><strong>H. Diagnóstica</strong></span>
+                    </div>
+                    <div class="card-row texto_medio table-cell table-cell-header" style="width:450px">
+                        <span><strong>Pendência</strong></span>
+                    </div>
+                    <div class="card-row texto-grande table-cell table-cell-header" style="width:60px">
+                        <span><strong>Hrs</strong></span>
+                    </div>
+                    <!-- <div class="card-row texto-grande table-cell table-cell-header" style="width:60px">
+                        <span><strong>Hrs AIH</strong></span>
+                    </div> -->
+                </div>
                 <div class="kanban-card table-row" v-for="(card, index) in cards" :key="index"
                     :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
                     <div class="card-row texto-grande table-cell">
@@ -51,20 +99,24 @@
                         <span>{{ card.DataAdmissao }}</span>
                     </div>
                     <div class="card-row texto-grande table-cell">
-                        <span>{{ card.HoraAdmissao }}</span>
+                        <span>{{ card.HoraAdmissao.slice(0, -3) }}</span>
                     </div>
                     <div class="card-row texto-grande table-cell">
-                        <span>{{ card.Nome ? (card.Nome + (card.Idade ? ", " + card.Idade : "")) : "" }}</span>
-                    </div>
-                    <div class="card-row texto_medio table-cell">
-                        <span><strong>{{ card.Hipotese ? "HD:" : "" }}</strong> {{ card.Hipotese }}</span>
-                    </div>
-                    <div class="card-row texto_medio table-cell">
-                        <span><strong>{{ card.Pendencia ? "Pendência:" : "" }}</strong> {{ card.Pendencia }}</span>
+                        <span>{{ card.Nome ? (nomeAbreviado(card.Nome) + (card.Idade ? ", " + card.Idade : "")) : ""
+                            }}</span>
                     </div>
                     <div class="card-row texto-grande table-cell">
-                        <span> {{ card.TotalHoras || "0" }} <strong>Horas</strong></span>
+                        <span><strong>{{ card.Hipotese || "" }}</strong></span>
                     </div>
+                    <div class="card-row texto-grande table-cell">
+                        <span><strong>{{ card.Pendencia || "" }}</strong></span>
+                    </div>
+                    <div class="card-row texto-grande table-cell" style="width:60px">
+                        <span> {{ card.TotalHoras || "0" }} </span>
+                    </div>
+                    <!-- <div class="card-row texto-grande table-cell" style="width:60px">
+                        <span> {{ card.HrsAIH || "0" }}</span>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -78,10 +130,40 @@ export default {
         return {
             tableView: false,
             kanbanData: {},
+            logged: false,
+            logging: false,
             loading: false,
+            error: "",
+            input_password: "",
         };
     },
     computed: {
+        async tentarLogin() {
+            this.logging = true;
+            try {
+                const response = await fetch("http://" + window.location.hostname + ":8000/authenticate/", {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ "input_password": this.input_password })
+                });
+                const data = await response.json();
+
+                if (data["status"] == "success") {
+                    this.logged = true;
+                    this.updateKanbanData()
+                } else {
+                    this.error = "Senha incorreta."
+                    this.input_password = ""
+                }
+            } catch (error) {
+                console.error(error);
+                this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+            }
+            this.logging = false;
+        },
         sortedKanbanData() {
             const sortedData = {};
             for (const [category, cards] of Object.entries(this.kanbanData)) {
@@ -110,24 +192,56 @@ export default {
     },
     methods: {
         async updateKanbanData() {
-            this.loading = true;
-            try {
-                const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/");
-                const data = await response.json();
-                console.log("Dados recebidos:", data);
-                this.kanbanData = data;
-            } catch (error) {
-                console.error("Erro ao buscar dados:", error);
-            } finally {
-                this.loading = false;
+            if (this.logged) {
+                this.loading = true;
+                try {
+                    const response = await fetch("http://" + window.location.hostname + ":8000/kanban-data/", {
+                        headers: {
+                            "password": this.input_password
+                        }
+                    });
+                    const data = await response.json();
+                    console.log("Dados recebidos:", data);
+                    if (data["status"] == "error") {
+                        this.logged = false;
+                        this.error = "O login expirou; favor realizar login novamente."
+                        this.kanbanData = {}
+                        this.input_password = ""
+                    } else if ("error" in data) {
+                        this.logged = false;
+                        this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+                        this.kanbanData = {}
+                        this.input_password = ""
+                    } else {
+                        this.kanbanData = data;
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar dados:", error);
+                    this.logged = false;
+                    this.error = "Um erro inesperado ocorreu; entre em contato com os desenvolvedores."
+                    this.kanbanData = {}
+                    this.input_password = ""
+                } finally {
+                    this.loading = false;
+                }
             }
+        },
+        nomeAbreviado(nome) {
+            var split = nome.split(" ")
+            var result = ""
+            split.forEach(function (value, index) {
+                if (index == 0) result += value.slice(0, 1).toUpperCase() + value.slice(1)
+                else result += value.slice(0, 1).toUpperCase() + "."
+                result += " "
+            })
+            return result.slice(0, -1)
         }
     },
     async mounted() {
-        this.updateKanbanData()
         setInterval(() => {
             this.updateKanbanData()
         }, 60000);
+
     },
 };
 </script>
@@ -201,6 +315,7 @@ export default {
 }
 
 .table-title {
+    writing-mode: vertical-rl;
     text-align: center;
     padding: 10px 5px;
     border-radius: 8px;
@@ -211,6 +326,8 @@ export default {
     justify-content: center;
     height: auto;
     white-space: nowrap;
+    /* Ensure the title is displayed vertically on the side */
+    margin-right: 10px;
 }
 
 .category-masculino {
@@ -293,15 +410,84 @@ export default {
     font-size: 18px;
 }
 
+/* Login form Rafa Teste*/
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.login-form {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.label {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    color: #333;
+    background-color: #ddd;
+}
+
+.input-field:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.submit-button {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #2980b9;
+}
+
+.submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
 .table-view {
     display: table;
     width: 100%;
     border-collapse: collapse;
-}
-
-.table-header {
-    display: table-header-group;
-    background-color: #f2f2f2;
 }
 
 .table-row {
@@ -318,5 +504,9 @@ export default {
 .table-cell-header {
     font-weight: bold;
     background-color: #f9f9f9;
+}
+
+.table-header-row {
+    background-color: #f2f2f2;
 }
 </style>
