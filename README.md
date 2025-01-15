@@ -1,149 +1,178 @@
-# Documentação
+# Painel Google Sheets
 
-![image](https://github.com/user-attachments/assets/a6cdde80-fcf7-4f8d-a3a3-8a48987faa7e)
-
-
-## Sobre o Projeto (Português)
-Essa API foi desenvolvida para manipular e fornecer dados de uma planilha do Google Sheets em um formato adequado para aplicações do tipo Kanban. A estrutura dos dados permite organizar informações por categorias como Masculino, Feminino e Infantil.
-
-### Funcionalidades
-- Extrai dados de uma planilha do Google Sheets.
-- Retorna informações filtradas e formatadas em um formato amigável para aplicações web.
-- Permite adaptações para diferentes planilhas.
+Este projeto é uma solução para monitoramento e organização, integrando o Google Sheets como fonte de dados para um painel interativo desenvolvido com Python (FastAPI) e Vue.js.
 
 ---
 
-## About the Project (English)
-This API was developed to manipulate and provide data from a Google Sheets spreadsheet in a format suitable for Kanban-style applications. The data structure allows organizing information into categories such as Masculino (Male), Feminino (Female), and Infantil (Child).
-
-### Features
-- Extracts data from a Google Sheets spreadsheet.
-- Returns filtered and formatted information in a web-friendly format.
-- Allows customizations for different spreadsheets.
+## Funcionalidades
+- Visualização dinâmica separados por categorias: Personalizável.
+- Atualização automática a cada minuto.
+- Sistema de autenticação para controle de acesso.
+- Integração direta com o Google Sheets para leitura de dados.
 
 ---
 
-## Instalação e Uso (Português)
+## Requisitos
 
-### Requisitos
-- Python 3.9 ou superior
-- Linux, macOS ou Windows
-- Google Service Account (credenciais JSON)
-
-### Instalação
-1. Clone o repositório:
-   ```bash
-   git clone <URL-do-repositório>
-   cd <nome-do-repositório>
-   ```
-
-2. Crie um ambiente virtual (opcional, mas recomendado):
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # Para Linux/Mac
-   venv\Scripts\activate  # Para Windows
-   ```
-
-3. Instale as dependências:
-   ```bash
-   pip install fastapi uvicorn gspread pandas
-   ```
-
-4. Coloque o arquivo `credenciais.json` (chave da sua conta de serviço Google) na raiz do projeto.
-
-### Uso
-1. Execute o servidor:
-   ```bash
-   uvicorn main:app --reload
-   ```
-
-2. Acesse a API em seu navegador ou ferramenta como o Postman:
-   - URL padrão: `http://127.0.0.1:8000/kanban-data/`
-
-3. Forneça o ID da sua planilha no parâmetro `sheet_id`.
-
-### Personalização
-Para adaptar a API à sua planilha:
-1. Abra o código e ajuste os cabeçalhos esperados:
-   ```python
-   expected_headers = [
-       "Nome do Paciente", "Idade", "Sexo", "Hipótese Diagnóstica", "Leito", "Pendências",
-       "Total de horas de admissão", "Necessário fazer AIH?"
-   ]
-   ```
-2. Certifique-se de que os cabeçalhos da sua planilha correspondem aos fornecidos.
-3. Modifique as lógicas de categorizacao conforme necessário.
-
-### Uso no Linux
-1. Instale o Python 3 e pip:
-   ```bash
-   sudo apt update
-   sudo apt install python3 python3-pip
-   ```
-2. Siga os passos da seção de Instalação acima.
+- **Python 3.8+**
+- **Node.js 16+**
+- **Google Account** com acesso ao Google Sheets.
+- **Credenciais** de API do Google (JSON).
+- **FastAPI** e bibliotecas relacionadas (veja abaixo).
 
 ---
 
-## Installation and Usage (English)
+## Configuração do Ambiente
 
-### Requirements
-- Python 3.9 or higher
-- Linux, macOS, or Windows
-- Google Service Account (JSON credentials)
+### 1. Clone o repositório
+```bash
+git clone <URL_DO_REPOSITORIO>
+cd <PASTA_DO_PROJETO>
+```
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd <repository-name>
-   ```
+### 2. Configure o ambiente virtual (venv)
+```bash
+python -m venv venv
+source venv/bin/activate   # Linux/macOS
+venv\Scripts\activate    # Windows
+```
 
-2. Create a virtual environment (optional but recommended):
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # For Linux/Mac
-   venv\Scripts\activate  # For Windows
-   ```
+### 3. Instale as dependências do backend
+```bash
+pip install fastapi uvicorn pandas gspread
+```
 
-3. Install dependencies:
-   ```bash
-   pip install fastapi uvicorn gspread pandas
-   ```
+### 4. Instale o Vue.js com Vite
 
-4. Place the `credentials.json` file (Google Service Account key) in the project root.
+1. Acesse a pasta `frontend`:
+```bash
+cd frontend
+```
 
-### Usage
-1. Run the server:
-   ```bash
-   uvicorn main:app --reload
-   ```
+2. Instale o Vite:
+```bash
+npm create vite@latest .
+npm install
+```
 
-2. Access the API via your browser or a tool like Postman:
-   - Default URL: `http://127.0.0.1:8000/kanban-data/`
-
-3. Provide your spreadsheet ID in the `sheet_id` parameter.
-
-### Customization
-To adapt the API to your spreadsheet:
-1. Open the code and adjust the expected headers:
-   ```python
-   expected_headers = [
-       "Nome do Paciente", "Idade", "Sexo", "Hipótese Diagnóstica", "Leito", "Pendências",
-       "Total de horas de admissão", "Necessário fazer AIH?"
-   ]
-   ```
-2. Ensure your spreadsheet headers match those provided.
-3. Modify the categorization logic as needed.
-
-### Usage on Linux
-1. Install Python 3 and pip:
-   ```bash
-   sudo apt update
-   sudo apt install python3 python3-pip
-   ```
-2. Follow the steps from the Installation section above.
+3. Instale as dependências adicionais:
+```bash
+npm install axios
+```
 
 ---
 
-## Contato (Contact)
-- Para dúvidas ou sugestões, entre em contato via email: [rafaelpsm@outlook.com.br]
+## Integração com o Google Sheets
+
+1. **Obtenha as credenciais da API do Google:**
+   - Acesse [Google Cloud Console](https://console.cloud.google.com/).
+   - Crie um novo projeto ou selecione um existente.
+   - Ative a API do Google Sheets e a API do Google Drive.
+   - Crie uma chave de serviço e baixe o arquivo JSON.
+
+2. **Configure as credenciais no projeto:**
+   - Renomeie o arquivo JSON para `credenciais.json`.
+   - Coloque o arquivo na raiz do projeto.
+
+3. **Configure o ID da planilha e a senha:**
+   - Crie um arquivo `sheet_id.txt` na raiz do projeto.
+   - Insira o ID da planilha na primeira linha.
+   - Insira a senha de acesso na segunda linha.
+
+Exemplo do `sheet_id.txt`:
+```
+1x2x3x4x5x6x7x8x9x0
+minha_senha_super_segura
+```
+
+---
+
+## Executando o Backend
+
+1. Inicie o servidor FastAPI:
+```bash
+uvicorn main:app --reload
+```
+
+2. O backend estará acessível em:
+```
+http://127.0.0.1:8000
+```
+
+---
+
+## Executando o Frontend
+
+1. Acesse a pasta do frontend:
+```bash
+cd frontend
+```
+
+2. Inicie o servidor do Vite:
+```bash
+npm run dev
+```
+
+3. O frontend estará acessível em:
+```
+http://127.0.0.1:5173
+```
+
+---
+
+## Rotas da API
+
+### 1. Autenticação
+- **Endpoint:** `/authenticate/`
+- **Método:** POST
+- **Corpo da requisição:**
+```json
+{
+  "input_password": "sua_senha"
+}
+```
+- **Resposta:**
+```json
+{
+  "status": "success" ou "error"
+}
+```
+
+### 2. Dados do Kanban
+- **Endpoint:** `/kanban-data/`
+- **Método:** GET
+- **Cabeçalho:**
+```
+password: sua_senha
+```
+- **Resposta:** Dados estruturados para exibição no painel.
+
+---
+
+## Estrutura do Projeto
+```
+/
+|-- backend/
+|   |-- main.py
+|   |-- credenciais.json
+|   |-- sheet_id.txt
+|
+|-- frontend/
+|   |-- src/
+|   |-- vite.config.js
+|
+|-- README.md
+```
+
+---
+
+## Personalização
+
+- **Adicionar colunas na planilha:** Certifique-se de atualizar a lista `expected_headers` no arquivo `main.py` para refletir as novas colunas.
+- **Alterar senha:** Atualize a segunda linha do arquivo `sheet_id.txt`.
+
+---
+
+## Dúvidas ou Sugestões
+Sinta-se à vontade para criar uma issue ou contribuir com melhorias neste projeto!
+
