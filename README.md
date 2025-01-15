@@ -2,6 +2,12 @@
 
 Este projeto é uma solução para monitoramento e organização, integrando o Google Sheets como fonte de dados para um painel interativo desenvolvido com Python (FastAPI) e Vue.js.
 
+<p align="center">
+  <img src="./imgs/senhafoto.png" alt="Senha" width="32%">
+  <img src="./imgs/painelhmcfoto.png" alt="Painel" width="32%">
+  <img src="./imgs/tabelahmc.png" alt="Tabela" width="32%">
+</p>
+
 ---
 
 ## Funcionalidades
