@@ -1,5 +1,5 @@
 <template>
-    <h1 v-if="!logged" style="color: #444;">Painel Leitos HMC</h1>
+    <h1 v-if="!logged" style="color: #444;">Autenticação</h1>
     <div v-if="!logged" class="login-container">
         <form @submit.prevent="tentarLogin" class="login-form">
             <h2 class="error-message">{{ error }}</h2>
