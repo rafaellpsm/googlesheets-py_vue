@@ -11,7 +11,7 @@ Este projeto é uma solução para monitoramento e organização, integrando o G
 ---
 
 ## Funcionalidades
-- Visualização dinâmica separados por categorias: Personalizável.
+- Visualização dinâmica separada por categorias: Personalizável.
 - Atualização automática a cada minuto.
 - Sistema de autenticação para controle de acesso.
 - Integração direta com o Google Sheets para leitura de dados.
@@ -22,7 +22,7 @@ Este projeto é uma solução para monitoramento e organização, integrando o G
 
 - **Python 3.8+**
 - **Node.js 16+**
-- **Google Account** com acesso ao Google Sheets.
+- **Conta Google** com acesso ao Google Sheets.
 - **Credenciais** de API do Google (JSON).
 - **FastAPI** e bibliotecas relacionadas (veja abaixo).
 
@@ -45,25 +45,19 @@ venv\Scripts\activate    # Windows
 
 ### 3. Instale as dependências do backend
 ```bash
-pip install fastapi uvicorn pandas gspread
+pip install -r requirements.txt
 ```
 
 ### 4. Instale o Vue.js com Vite
 
-1. Acesse a pasta `frontend`:
+1. Acesse a pasta `kanban-app`:
 ```bash
-cd frontend
+cd kanban-app
 ```
 
 2. Instale o Vite:
 ```bash
-npm create vite@latest .
 npm install
-```
-
-3. Instale as dependências adicionais:
-```bash
-npm install axios
 ```
 
 ---
@@ -78,7 +72,7 @@ npm install axios
 
 2. **Configure as credenciais no projeto:**
    - Renomeie o arquivo JSON para `credenciais.json`.
-   - Coloque o arquivo na raiz do projeto.
+   - Coloque o arquivo na pasta raiz do projeto.
 
 3. **Configure o ID da planilha e a senha:**
    - Crie um arquivo `sheet_id.txt` na raiz do projeto.
@@ -89,6 +83,63 @@ Exemplo do `sheet_id.txt`:
 ```
 1x2x3x4x5x6x7x8x9x0
 minha_senha_super_segura
+```
+
+---
+
+## Personalização do Código
+
+### 1. Atualize os headers esperados no `main.py`
+Abra o arquivo `main.py` e atualize a lista `expected_headers` com os cabeçalhos da sua planilha do Google Sheets.
+
+```python
+# filepath: /c:/Users/rafael.marcal/Documents/GitHub/googlesheets-py_vue/main.py
+# ...existing code...
+expected_headers = [
+    "Data de admissão", "Hora admissão",
+    "Nome do Paciente", "Idade", "Sexo", 
+    "Hipótese Diagnóstica", "Leito", "Pendências", 
+    "Tempo de Perm.", "Necessário fazer AIH?", "AIH Feita?", "Hrs. AIH Feita"
+]
+# ...existing code...
+```
+
+### 2. Atualize os campos do card no `KanbanBoard.vue`
+Abra o arquivo `KanbanBoard.vue` e atualize os campos do card para corresponder aos dados da sua planilha.
+
+```vue
+// filepath: /c:/Users/rafael.marcal/Documents/GitHub/googlesheets-py_vue/kanban-app/src/components/KanbanBoard.vue
+// ...existing code...
+<div class="kanban-card" v-for="(card, index) in cards" :key="index"
+    :class="{ highlight_yellow: card.TotalHoras >= 20 && card.TotalHoras < 24, highlight_red: card.TotalHoras >= 24, highlight_green: card.AIHFeita === 'Sim' }">
+    <div v-if="card.Nome">
+        <div class="card-row texto-grande">
+            <span><strong>{{ card.Leito }}</strong></span>
+        </div>
+        <div class="card-row texto-grande">
+            <span>{{ card.Nome ? (nomeAbreviado(card.Nome) + (card.Idade ? ", " + card.Idade : "")) : "" }}</span>
+        </div>
+        <div class="card-row texto-grande">
+            <span><strong>Admissão:</strong> {{ card.DataAdmissao + ", " + card.HoraAdmissao.slice(0, -3) }}</span>
+        </div>
+        <div class="card-row texto-grande">
+            <span><strong>Horas Totais:</strong> {{ card.TotalHoras || "0" }}</span>
+        </div>
+        <div class="card-row texto_medio">
+            <span><strong>{{ card.Hipotese ? "HD:" : "" }}</strong> {{ card.Hipotese }}</span>
+        </div>
+        <div class="card-row texto_medio">
+            <span><strong>{{ card.Pendencia ? "Pendência:" : "" }}</strong> {{ card.Pendencia }}</span>
+        </div>
+    </div>
+    <div v-else>
+        <div class="leito_livre">
+            <p><strong>{{ card.Leito }}</strong></p>
+            <h1 style="color: green;">Livre</h1>
+        </div>
+    </div>
+</div>
+// ...existing code...
 ```
 
 ---
@@ -111,7 +162,7 @@ http://127.0.0.1:8000
 
 1. Acesse a pasta do frontend:
 ```bash
-cd frontend
+cd kanban-app
 ```
 
 2. Inicie o servidor do Vite:
@@ -163,7 +214,7 @@ password: sua_senha
 |   |-- credenciais.json
 |   |-- sheet_id.txt
 |
-|-- frontend/
+|-- kanban-app/
 |   |-- src/
 |   |-- vite.config.js
 |
@@ -181,4 +232,3 @@ password: sua_senha
 
 ## Dúvidas ou Sugestões
 Sinta-se à vontade para criar uma issue ou contribuir com melhorias neste projeto!
-
