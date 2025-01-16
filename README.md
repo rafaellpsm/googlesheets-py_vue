@@ -50,9 +50,9 @@ pip install fastapi uvicorn pandas gspread
 
 ### 4. Instale o Vue.js com Vite
 
-1. Acesse a pasta `frontend`:
+1. Acesse a pasta `kanban-app`:
 ```bash
-cd frontend
+cd kanban-app
 ```
 
 2. Instale o Vite:
@@ -111,7 +111,7 @@ http://127.0.0.1:8000
 
 1. Acesse a pasta do frontend:
 ```bash
-cd frontend
+cd kanban-app
 ```
 
 2. Inicie o servidor do Vite:
@@ -163,7 +163,7 @@ password: sua_senha
 |   |-- credenciais.json
 |   |-- sheet_id.txt
 |
-|-- frontend/
+|-- kanban-app/
 |   |-- src/
 |   |-- vite.config.js
 |
