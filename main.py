@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import gspread
 import pandas as pd
 import traceback
+import json
 
 app = FastAPI()
 
@@ -15,38 +16,38 @@ app.add_middleware(
 )
 
 gc = gspread.service_account("credenciais.json")
-sheet_string = ""
-password = ""
-with open('sheet_id.txt', 'r') as file:
-    file_content = file.read().rstrip().split("\n")
-    sheet_string = file_content[0]
-    password = file_content[1]
+config = {}
+with open('sheet_config.json') as file:
+    config = json.load(file)
+
 
 @app.post("/authenticate/")
 async def authenticate(request: Request):
     json = await request.json()
     input_password = json["input_password"]
-    return {"status": "success" if input_password == password else "error"}
+    unidade = json["unidade"]
+    return {"status": "success" if input_password == config[unidade]['password'] else "error"}
+
 
 @app.get("/kanban-data/")
 async def get_kanban_data(
     request: Request,
-    sheet_id: str = Query(
-        sheet_string, 
+):
+    sheet_id = Query(
+        config["observacao"]["sheet_string"],
         description="ID da planilha Google"
     )
-):
-    if (request.headers.get('password') != password): return {"status": "error"}
+    if (request.headers.get('password') != config["observacao"]["password"]):
+        return {"status": "error"}
     try:
-        print(f"ID da planilha recebido: {sheet_id}")
-        
+        print(sheet_id)
         sheet = gc.open_by_key(sheet_id).sheet1
 
         expected_headers = [
             "Data de admissão", "Hora admissão",
-            "Nome do Paciente", "Idade", "Sexo", 
-            "Hipótese Diagnóstica", "Leito", "Pendências", 
-            "Tempo de Perm.", "Necessário fazer AIH?", "AIH Feita?", "Hrs. AIH Feita"
+            "Nome do Paciente", "Idade", "Sexo",
+            "Hipótese Diagnóstica", "Leito", "Pendências",
+            "Tempo de Perm.", "Necessário fazer AIH?", "AIH Feita?"
         ]
 
         records = sheet.get_all_records(expected_headers=expected_headers)
@@ -57,15 +58,14 @@ async def get_kanban_data(
             "Nome do Paciente",
             "Data de admissão",
             "Hora admissão",
-            "Idade", 
-            "Sexo", 
-            "Hipótese Diagnóstica", 
-            "Leito", 
-            "Pendências", 
-            "Tempo de Perm.", 
+            "Idade",
+            "Sexo",
+            "Hipótese Diagnóstica",
+            "Leito",
+            "Pendências",
+            "Tempo de Perm.",
             "Necessário fazer AIH?",
-            "AIH Feita?",
-            "Hrs. AIH Feita"
+            "AIH Feita?"
         ]]
 
         kanban_data = {"MASCULINO": [], "FEMININO": [], "INFANTIL": []}
@@ -73,11 +73,12 @@ async def get_kanban_data(
         for _, row in df.iterrows():
             # Determinar categoria
             leito_original = row.get("Leito", "")
-            categoria = "INFANTIL" if "P" in leito_original else ("MASCULINO" if "M" in leito_original else "FEMININO" if "F" in leito_original else "")
-            
+            categoria = "INFANTIL" if "P" in leito_original else (
+                "MASCULINO" if "M" in leito_original else "FEMININO" if "F" in leito_original else "")
+
             # Formatar valor do leito
-            #leito_formatado = f"Leito {leito_original[1:].replace('_','').capitalize()}" if leito_original else "Leito Não informado"
-            
+            # leito_formatado = f"Leito {leito_original[1:].replace('_','').capitalize()}" if leito_original else "Leito Não informado"
+
             card = {
                 "Nome": row.get("Nome do Paciente", ""),
                 "Idade": row.get("Idade", "Não informado"),

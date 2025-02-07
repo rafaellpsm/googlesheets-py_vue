@@ -147,7 +147,7 @@ export default {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ "input_password": this.input_password })
+                    body: JSON.stringify({ "input_password": this.input_password, "unidade": "observacao" })
                 });
                 const data = await response.json();
 
